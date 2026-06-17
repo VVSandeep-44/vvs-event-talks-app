@@ -136,6 +136,16 @@
     border-color: #ffffff;
 }
 
+:root.light-theme .brand-text h1 {
+    background: linear-gradient(135deg, #0f172a 40%, #475569 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+:root.light-theme .brand-subtitle {
+    color: #475569;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
