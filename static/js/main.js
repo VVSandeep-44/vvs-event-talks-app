@@ -5,6 +5,7 @@ let selectedIds = new Set();
 let activeCategory = 'all';
 let searchQuery = '';
 let sortBy = 'newest';
+let dateRange = 'all'; // Filter for date ranges
 let activeTemplate = 'standard';
 let tempSingleTweetUpdate = null; // Stores update if single-tweeting without overriding selections
 
@@ -34,8 +35,9 @@ const elements = {
     themeIconMoon: document.getElementById('theme-icon-moon'),
     themeIconSun: document.getElementById('theme-icon-sun'),
     
-    // Export CSV
+    // Export CSV & Date Range
     exportCsvBtn: document.getElementById('export-csv-btn'),
+    dateRangeSelect: document.getElementById('date-range-select'),
     
     // Selection Drawer
     selectionDrawer: document.getElementById('selection-drawer'),
@@ -124,6 +126,14 @@ function initEventListeners() {
         elements.exportCsvBtn.addEventListener('click', exportToCSV);
     }
 
+    // Date Range Actions
+    if (elements.dateRangeSelect) {
+        elements.dateRangeSelect.addEventListener('change', (e) => {
+            dateRange = e.target.value;
+            filterAndRender();
+        });
+    }
+
     // Tweet Modal Actions
     elements.closeModalBtn.addEventListener('click', closeTweetModal);
     elements.tweetModal.addEventListener('click', (e) => {
@@ -191,6 +201,16 @@ async function fetchNotes(forceRefresh = false) {
 
 // --- Filtering & Sorting & Rendering ---
 function filterAndRender() {
+    // Determine date threshold if filter active
+    let thresholdDate = null;
+    if (dateRange !== 'all') {
+        const days = parseInt(dateRange, 10);
+        thresholdDate = new Date();
+        thresholdDate.setDate(thresholdDate.getDate() - days);
+        // Normalize time to midnight for clean comparison
+        thresholdDate.setHours(0, 0, 0, 0);
+    }
+
     // 1. Filter
     filteredReleases = releases.filter(note => {
         // Category Filter
@@ -203,7 +223,14 @@ function filterAndRender() {
             note.category.toLowerCase().includes(searchQuery) ||
             note.content_text.toLowerCase().includes(searchQuery);
             
-        return matchesCategory && matchesSearch;
+        // Date Range Filter
+        let matchesDate = true;
+        if (thresholdDate) {
+            const noteDate = new Date(note.updated_iso || note.date);
+            matchesDate = noteDate >= thresholdDate;
+        }
+            
+        return matchesCategory && matchesSearch && matchesDate;
     });
 
     // 2. Sort
