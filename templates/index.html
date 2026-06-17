@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub | Search & Share Updates</title>
+    <meta name="description" content="Stay up to date with the latest Google Cloud BigQuery releases. Browse, filter, search, and share updates directly to X (formerly Twitter).">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#brand-grad)" />
+                        <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="url(#brand-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="brand-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#38bdf8" />
+                                <stop offset="1" stop-color="#3b82f6" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>BigQuery Release Hub</h1>
+                    <span class="brand-subtitle" id="feed-last-updated">Checking feed status...</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button id="refresh-btn" class="btn btn-primary" title="Refresh Release Notes">
+                    <svg id="refresh-icon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            
+            <!-- Filters Toolbar -->
+            <section class="toolbar-section">
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search release notes by keyword (e.g. JSON, pricing, functions)..." aria-label="Search release notes">
+                    <button id="clear-search-btn" class="clear-btn" style="display: none;" title="Clear search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label class="filter-label">Categories</label>
+                        <div id="category-pills" class="category-pills">
+                            <button class="pill active" data-category="all">All</button>
+                            <button class="pill" data-category="Feature">Features</button>
+                            <button class="pill" data-category="Change">Changes</button>
+                            <button class="pill" data-category="Issue">Issues</button>
+                            <button class="pill" data-category="Fix">Fixes</button>
+                            <button class="pill" data-category="Announcement">Announcements</button>
+                            <button class="pill" data-category="Deprecated">Deprecated</button>
+                        </div>
+                    </div>
+                    
+                    <div class="sort-group">
+                        <label for="sort-select" class="filter-label">Sort</label>
+                        <select id="sort-select" class="sort-dropdown">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="toolbar-meta">
+                    <span id="results-count">Showing 0 updates</span>
+                </div>
+            </section>
+
+            <!-- Error Banner -->
+            <div id="error-banner" class="alert alert-error" style="display: none;">
+                <div class="alert-content">
+                    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span id="error-message">Failed to load release notes. Please try again.</span>
+                </div>
+                <button id="error-close-btn" class="alert-close">&times;</button>
+            </div>
+
+            <!-- Content Area (Grid of Cards) -->
+            <section class="notes-section">
+                <!-- Loading State -->
+                <div id="loading-state" class="state-container">
+                    <div class="double-spinner">
+                        <div class="spinner-circle spinner-1"></div>
+                        <div class="spinner-circle spinner-2"></div>
+                    </div>
+                    <p>Fetching latest BigQuery release notes...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="state-container" style="display: none;">
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                            <line x1="9" y1="11" x2="15" y2="11"></line>
+                            <line x1="9" y1="18" x2="10" y2="18"></line>
+                        </svg>
+                    </div>
+                    <h3>No updates found</h3>
+                    <p>Try adjusting your search terms or filters.</p>
+                </div>
+
+                <!-- Cards Grid -->
+                <div id="notes-grid" class="notes-grid" style="display: none;">
+                    <!-- Dynamically populated via JavaScript -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Floating Selection Bar (Slides up from bottom when notes are selected) -->
+        <div id="selection-drawer" class="selection-drawer">
+            <div class="drawer-content">
+                <div class="drawer-info">
+                    <span class="badge badge-selection" id="selection-count">0 Selected</span>
+                    <p class="drawer-text">Select updates to tweet about them together.</p>
+                </div>
+                <div class="drawer-actions">
+                    <button id="clear-selection-btn" class="btn btn-secondary btn-sm">Clear</button>
+                    <button id="compose-tweet-btn" class="btn btn-twitter btn-sm">
+                        <svg class="icon twitter-svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <span>Tweet Selected</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tweet Composer Modal -->
+        <div id="tweet-modal" class="modal-backdrop" style="display: none;">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h2>Compose Tweet</h2>
+                    <button id="close-modal-btn" class="modal-close" title="Close dialog">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Template Selector -->
+                    <div class="template-selector-container">
+                        <label class="filter-label">Choose Tweet Style</label>
+                        <div class="template-pills">
+                            <button class="pill active" data-template="standard">Standard</button>
+                            <button class="pill" data-template="minimal">Minimal</button>
+                            <button class="pill" data-template="bullet">Detailed</button>
+                        </div>
+                    </div>
+
+                    <!-- Textarea -->
+                    <div class="textarea-wrapper">
+                        <textarea id="tweet-textarea" rows="8" placeholder="What's happening?"></textarea>
+                    </div>
+                    
+                    <!-- Composer Footer -->
+                    <div class="composer-footer">
+                        <div class="character-counter-wrapper">
+                            <div class="progress-ring-container">
+                                <svg class="progress-ring" width="36" height="36">
+                                    <circle class="progress-ring-bg" stroke="#334155" stroke-width="3" fill="transparent" r="14" cx="18" cy="18"/>
+                                    <circle id="progress-ring-fill" class="progress-ring-fill" stroke="#38bdf8" stroke-width="3" fill="transparent" r="14" cx="18" cy="18"/>
+                                </svg>
+                                <span id="char-count-text" class="char-count-text">280</span>
+                            </div>
+                        </div>
+                        
+                        <button id="submit-tweet-btn" class="btn btn-twitter">
+                            <svg class="icon twitter-svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                            <span>Share on X</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
