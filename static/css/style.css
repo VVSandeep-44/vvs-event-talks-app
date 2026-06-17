@@ -51,6 +51,91 @@
     --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root.light-theme {
+    --bg-dark: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f1f5f9;
+    --bg-surface-selected: #e2e8f0;
+    
+    --border-color: rgba(15, 23, 42, 0.08);
+    --border-color-hover: rgba(15, 23, 42, 0.15);
+    --border-selected: #0284c7;
+    
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    
+    --primary: #0284c7;
+    --primary-glow: rgba(2, 132, 199, 0.1);
+    --primary-hover: #0369a1;
+    --primary-active: #075985;
+    
+    --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    --card-shadow-hover: 0 10px 30px -4px rgba(2, 132, 199, 0.12);
+}
+
+/* Light Theme Element Overrides */
+:root.light-theme #search-input {
+    background-color: #ffffff;
+    color: #0f172a;
+}
+:root.light-theme #sort-select {
+    background-color: #ffffff;
+    color: #0f172a;
+}
+:root.light-theme #tweet-textarea {
+    background-color: #ffffff;
+    color: #0f172a;
+}
+:root.light-theme .pill {
+    background: rgba(15, 23, 42, 0.03);
+}
+:root.light-theme .pill:hover {
+    background: rgba(15, 23, 42, 0.08);
+}
+:root.light-theme .pill.active {
+    background-color: var(--primary);
+    color: #ffffff;
+}
+:root.light-theme .app-header {
+    background: rgba(255, 255, 255, 0.7);
+}
+:root.light-theme .selection-drawer {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(15, 23, 42, 0.1);
+    box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.2);
+}
+:root.light-theme .selection-drawer .drawer-text {
+    color: var(--text-secondary);
+}
+:root.light-theme .modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.4);
+}
+:root.light-theme code {
+    background-color: rgba(15, 23, 42, 0.05);
+    color: #0f172a;
+    border-color: rgba(15, 23, 42, 0.05);
+}
+:root.light-theme .progress-ring-bg {
+    stroke: rgba(15, 23, 42, 0.05);
+}
+:root.light-theme .btn-secondary {
+    background-color: #ffffff;
+    color: var(--text-primary);
+}
+:root.light-theme .btn-secondary:hover {
+    background-color: #f1f5f9;
+}
+:root.light-theme .checkmark {
+    background-color: #ffffff;
+}
+:root.light-theme .select-checkbox-container input:checked ~ .checkmark {
+    background-color: var(--primary);
+}
+:root.light-theme .select-checkbox-container .checkmark:after {
+    border-color: #ffffff;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -358,9 +443,12 @@ body {
 }
 
 .toolbar-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 0.8rem;
     color: var(--text-muted);
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--border-color);
     padding-top: 0.75rem;
 }
 
@@ -705,6 +793,41 @@ body {
 .btn-card-tweet:hover {
     color: var(--twitter-blue);
     background-color: rgba(29, 155, 240, 0.08);
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-card-copy {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    transition: var(--transition-fast);
+}
+
+.btn-card-copy:hover {
+    color: var(--primary);
+    background-color: var(--primary-glow);
+}
+
+.btn-icon {
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* --- Floating Selection Drawer --- */

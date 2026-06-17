@@ -29,6 +29,14 @@ const elements = {
     errorCloseBtn: document.getElementById('error-close-btn'),
     feedLastUpdated: document.getElementById('feed-last-updated'),
     
+    // Theme Switcher
+    themeToggle: document.getElementById('theme-toggle'),
+    themeIconMoon: document.getElementById('theme-icon-moon'),
+    themeIconSun: document.getElementById('theme-icon-sun'),
+    
+    // Export CSV
+    exportCsvBtn: document.getElementById('export-csv-btn'),
+    
     // Selection Drawer
     selectionDrawer: document.getElementById('selection-drawer'),
     selectionCount: document.getElementById('selection-count'),
@@ -47,6 +55,7 @@ const elements = {
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     initEventListeners();
     fetchNotes(false);
 });
@@ -104,6 +113,16 @@ function initEventListeners() {
         tempSingleTweetUpdate = null; // Ensure we tweet the checked selections
         openTweetModal();
     });
+
+    // Theme Toggle Actions
+    if (elements.themeToggle) {
+        elements.themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    // Export CSV Actions
+    if (elements.exportCsvBtn) {
+        elements.exportCsvBtn.addEventListener('click', exportToCSV);
+    }
 
     // Tweet Modal Actions
     elements.closeModalBtn.addEventListener('click', closeTweetModal);
@@ -246,19 +265,28 @@ function renderGrid() {
                         <line x1="10" y1="14" x2="21" y2="3"></line>
                     </svg>
                 </a>
-                <button class="btn-card-tweet" title="Tweet this update">
-                    <svg class="icon twitter-svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                    <span>Tweet</span>
-                </button>
+                <div class="card-actions">
+                    <button class="btn-card-copy" title="Copy text to clipboard">
+                        <svg class="icon copy-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Copy</span>
+                    </button>
+                    <button class="btn-card-tweet" title="Tweet this update">
+                        <svg class="icon twitter-svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <span>Tweet</span>
+                    </button>
+                </div>
             </div>
         `;
         
         // Attach Card Interaction Events
         // 1. Click anywhere on card (except links, buttons, checkbox wrappers) triggers selection toggle
         card.addEventListener('click', (e) => {
-            if (e.target.closest('a') || e.target.closest('.btn-card-tweet') || e.target.closest('.select-checkbox-container')) {
+            if (e.target.closest('a') || e.target.closest('.btn-card-tweet') || e.target.closest('.btn-card-copy') || e.target.closest('.select-checkbox-container')) {
                 return;
             }
             toggleCardSelection(note.id);
@@ -276,6 +304,13 @@ function renderGrid() {
             e.stopPropagation();
             tempSingleTweetUpdate = note;
             openTweetModal(note);
+        });
+
+        // 4. Copy Button Action
+        const copyBtn = card.querySelector('.btn-card-copy');
+        copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyToClipboard(note.content_text, copyBtn);
         });
         
         elements.notesGrid.appendChild(card);
@@ -554,4 +589,114 @@ function getCategoryClass(category) {
     if (cat.includes('announcement') || cat.includes('notice')) return 'announcement';
     if (cat.includes('deprecated') || cat.includes('deprecation')) return 'deprecated';
     return 'general';
+}
+
+// --- Theme Management ---
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-theme');
+        if (elements.themeIconMoon) elements.themeIconMoon.style.display = 'none';
+        if (elements.themeIconSun) elements.themeIconSun.style.display = 'block';
+    } else {
+        document.documentElement.classList.remove('light-theme');
+        if (elements.themeIconMoon) elements.themeIconMoon.style.display = 'block';
+        if (elements.themeIconSun) elements.themeIconSun.style.display = 'none';
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.documentElement.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    
+    if (isLight) {
+        if (elements.themeIconMoon) elements.themeIconMoon.style.display = 'none';
+        if (elements.themeIconSun) elements.themeIconSun.style.display = 'block';
+    } else {
+        if (elements.themeIconMoon) elements.themeIconMoon.style.display = 'block';
+        if (elements.themeIconSun) elements.themeIconSun.style.display = 'none';
+    }
+}
+
+// --- Copy to Clipboard ---
+function copyToClipboard(text, buttonElement) {
+    if (!navigator.clipboard) {
+        // Fallback for older browsers or non-HTTPS
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showCopyFeedback(buttonElement);
+        } catch (err) {
+            console.error('Fallback: Unable to copy', err);
+        }
+        document.body.removeChild(textarea);
+        return;
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showCopyFeedback(buttonElement);
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+function showCopyFeedback(btn) {
+    const span = btn.querySelector('span');
+    const originalText = span.textContent;
+    
+    span.textContent = 'Copied!';
+    btn.style.color = 'var(--primary)';
+    
+    setTimeout(() => {
+        span.textContent = originalText;
+        btn.style.color = '';
+    }, 1500);
+}
+
+// --- Export CSV ---
+function exportToCSV() {
+    if (filteredReleases.length === 0) {
+        alert('No updates available to export.');
+        return;
+    }
+    
+    // Setup headers
+    const headers = ['Date', 'Category', 'Update Link', 'Content'];
+    
+    // Parse rows
+    const rows = filteredReleases.map(note => [
+        note.date,
+        note.category,
+        note.link,
+        note.content_text
+    ]);
+    
+    // Construct CSV content
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(value => {
+            // Escape double quotes and wrap in quotes
+            const escaped = String(value).replace(/"/g, '""');
+            return `"${escaped}"`;
+        }).join(','))
+    ].join('\r\n');
+    
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    const timestamp = new Date().toISOString().slice(0, 10);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_release_notes_${timestamp}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
