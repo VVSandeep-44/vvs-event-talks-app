@@ -568,7 +568,7 @@ function launchTwitterIntent() {
 // --- Helper Functions ---
 function toggleLoading(isLoading) {
     if (isLoading) {
-        elements.loadingState.style.display = 'flex';
+        elements.loadingState.style.display = 'grid';
         elements.notesGrid.style.display = 'none';
         elements.emptyState.style.display = 'none';
         elements.refreshIcon.classList.add('spinning');

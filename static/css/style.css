@@ -1062,3 +1062,126 @@ body {
 .char-count-text.danger {
     color: var(--color-issue);
 }
+
+/* --- Skeleton Loader Shimmer Grid --- */
+.skeleton-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 240px;
+    box-shadow: var(--card-shadow);
+}
+
+.skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.skeleton-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeleton-badge {
+    height: 18px;
+    width: 60px;
+    border-radius: 4px;
+}
+
+.skeleton-date {
+    height: 12px;
+    width: 100px;
+    border-radius: 3px;
+}
+
+.skeleton-checkbox {
+    height: 20px;
+    width: 20px;
+    border-radius: 4px;
+}
+
+.skeleton-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.skeleton-line {
+    height: 14px;
+    border-radius: 4px;
+}
+
+.skeleton-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+}
+
+.skeleton-link {
+    height: 12px;
+    width: 80px;
+    border-radius: 3px;
+}
+
+.skeleton-btn {
+    height: 24px;
+    width: 60px;
+    border-radius: 4px;
+}
+
+/* Shimmer Animation Effect */
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.03) 25%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.03) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+:root.light-theme .shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.03) 25%,
+        rgba(15, 23, 42, 0.08) 50%,
+        rgba(15, 23, 42, 0.03) 75%
+    );
+    background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Colors for shimmers in themes */
+.skeleton-badge,
+.skeleton-date,
+.skeleton-checkbox,
+.skeleton-line,
+.skeleton-link,
+.skeleton-btn {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+:root.light-theme .skeleton-badge,
+:root.light-theme .skeleton-date,
+:root.light-theme .skeleton-checkbox,
+:root.light-theme .skeleton-line,
+:root.light-theme .skeleton-link,
+:root.light-theme .skeleton-btn {
+    background-color: rgba(15, 23, 42, 0.04);
+}
